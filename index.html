@@ -272,14 +272,14 @@ function itemMarkup(it, edit, sel) {
       `<text style="font-family:${fontStack()};font-size:${r3(it.size * K)}px;font-weight:${it.bold ? 700 : 400};letter-spacing:${r3(it.spacing * K)}px;white-space:pre" fill="#000">${textTspans(b.lines, it.size, it.align, b.w)}</text></g>`;
   }
   if (it.kind === 'pin') {
+    // Tropfenform als einzelner Pfad (Tangenten vom Tip an den Kreis) + Loch per evenodd, keine Maske
     const {r, w, h} = pinGeo(it);
-    const id = 'pm_' + it.id;
+    const al = Math.acos(1 / 2.1), sx = Math.sin(al) * r, sy = Math.cos(al) * r;
+    const P = (x, y) => `${r3(x)} ${r3(y)}`;
+    const d = `M${P(r, 3.1 * r)} L${P(r + sx, r + sy)} A${r3(r)} ${r3(r)} 0 1 0 ${P(r - sx, r + sy)} Z ` +
+      `M${P(r - 0.4 * r, r)} A${r3(0.4 * r)} ${r3(0.4 * r)} 0 1 0 ${P(r + 0.4 * r, r)} A${r3(0.4 * r)} ${r3(0.4 * r)} 0 1 0 ${P(r - 0.4 * r, r)} Z`;
     return `<g${idAttr} transform="translate(${r3(it.x)} ${r3(it.y)})" style="cursor:move">` +
-      `<mask id="${id}" maskUnits="userSpaceOnUse" x="0" y="0" width="${r3(w)}" height="${r3(h)}">` +
-      `<circle cx="${r3(r)}" cy="${r3(r)}" r="${r3(r)}" fill="#fff"/>` +
-      `<polygon points="${r3(r * 0.15)},${r3(r * 1.5)} ${r3(r * 1.85)},${r3(r * 1.5)} ${r3(r)},${r3(r * 3.1)}" fill="#fff"/>` +
-      `<circle cx="${r3(r)}" cy="${r3(r)}" r="${r3(r * 0.4)}" fill="#000"/></mask>` +
-      `<rect width="${r3(w)}" height="${r3(h)}" fill="#000" mask="url(#${id})"/>` +
+      `<path d="${d}" fill="#000" fill-rule="evenodd"/>` +
       (edit ? `<rect width="${r3(w)}" height="${r3(h)}" fill="#000" fill-opacity="0" pointer-events="all"/>` : '') + `</g>`;
   }
   if (it.kind === 'route') {
